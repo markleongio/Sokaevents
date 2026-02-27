@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSA D2 Events — User Guide</title>
+<style>
+  :root {
+    --deep: #1a0a2e; --gold: #b8860b; --gold-light: #d4a843;
+    --accent: #6b3fa0; --bg: #f7f3ee; --surface: #fff;
+    --text: #1a0a2e; --muted: #7a6e82; --border: #e8ddd0;
+    --green: #16a34a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif; max-width:640px; margin:0 auto; }
+
+  /* HEADER */
+  .hero { background:var(--deep); padding:40px 24px 32px; text-align:center; position:relative; overflow:hidden; }
+  .hero::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gold),var(--gold-light),transparent); }
+  .hero-label { font-size:10px; letter-spacing:4px; color:var(--gold-light); text-transform:uppercase; margin-bottom:10px; }
+  .hero-title { font-size:30px; font-weight:800; color:#fff; margin-bottom:6px; }
+  .hero-title span { color:var(--gold-light); }
+  .hero-sub { font-size:13px; color:rgba(255,255,255,.5); }
+
+  /* SECTIONS */
+  .section { padding:24px 20px 0; }
+  .section-badge { display:inline-flex; align-items:center; gap:8px; background:var(--deep); color:var(--gold-light); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 14px; border-radius:20px; margin-bottom:16px; }
+  .section-title { font-size:22px; font-weight:800; color:var(--deep); margin-bottom:4px; }
+  .section-sub { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+
+  /* STEPS */
+  .steps { display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+  .step { background:var(--surface); border-radius:16px; padding:16px 18px; border:1px solid var(--border); display:flex; gap:14px; align-items:flex-start; box-shadow:0 2px 8px rgba(26,10,46,.05); }
+  .step-num { width:32px; height:32px; min-width:32px; background:var(--deep); color:var(--gold-light); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; }
+  .step-num.green { background:var(--green); color:#fff; }
+  .step-num.purple { background:var(--accent); color:#fff; }
+  .step-text { flex:1; }
+  .step-text strong { display:block; font-size:14px; color:var(--deep); margin-bottom:3px; }
+  .step-text p { font-size:12px; color:var(--muted); line-height:1.5; }
+  .step-icon { font-size:22px; }
+
+  /* TIP BOX */
+  .tip { background:#fffbeb; border:1px solid #fcd34d; border-radius:14px; padding:14px 16px; margin-bottom:24px; display:flex; gap:12px; }
+  .tip-icon { font-size:20px; flex-shrink:0; }
+  .tip p { font-size:12px; color:#92400e; line-height:1.6; }
+  .tip strong { display:block; margin-bottom:2px; font-size:13px; }
+
+  /* PHONE MOCKUP */
+  .phone-wrap { display:flex; justify-content:center; margin:0 0 24px; }
+  .phone { background:var(--deep); border-radius:32px; width:200px; padding:16px 12px; box-shadow:0 12px 40px rgba(26,10,46,.25); border:3px solid #2d1a4a; position:relative; }
+  .phone-notch { width:60px; height:8px; background:#2d1a4a; border-radius:4px; margin:0 auto 14px; }
+  .phone-screen { background:var(--bg); border-radius:16px; padding:12px; min-height:160px; }
+  .phone-events { display:flex; flex-direction:column; gap:8px; }
+  .phone-header { background:var(--deep); border-radius:10px; padding:10px; margin-bottom:8px; }
+  .phone-header-title { font-size:11px; font-weight:800; color:#fff; }
+  .phone-header-sub { font-size:8px; color:rgba(255,255,255,.4); margin-top:1px; }
+  .phone-card { background:#fff; border-radius:8px; padding:8px; display:flex; gap:6px; border:1px solid var(--border); }
+  .phone-card-date { background:var(--deep); border-radius:5px; width:28px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 2px; }
+  .phone-card-day { font-size:11px; font-weight:800; color:var(--gold-light); }
+  .phone-card-dow { font-size:6px; color:rgba(255,255,255,.4); letter-spacing:0.5px; }
+  .phone-card-body { flex:1; }
+  .phone-card-title { font-size:9px; font-weight:700; color:var(--deep); }
+  .phone-card-meta { font-size:7px; color:var(--muted); margin-top:2px; }
+  .phone-btn { background:var(--gold); color:var(--deep); font-size:7px; font-weight:700; padding:3px 8px; border-radius:10px; display:inline-block; margin-top:4px; }
+  .phone-detail { padding:8px; }
+  .phone-detail-title { font-size:10px; font-weight:800; color:var(--deep); margin-bottom:6px; }
+  .phone-detail-row { display:flex; gap:6px; margin-bottom:4px; align-items:center; }
+  .phone-detail-icon { font-size:10px; }
+  .phone-detail-text { font-size:8px; color:var(--muted); }
+  .phone-action-row { display:flex; gap:4px; margin-top:8px; }
+  .phone-action-cal { flex:1; background:#f5e6c0; border:1px solid var(--gold); border-radius:6px; padding:5px 4px; font-size:7px; font-weight:700; color:var(--gold); text-align:center; }
+  .phone-action-map { flex:1; background:#f0e8ff; border:1px solid var(--accent); border-radius:6px; padding:5px 4px; font-size:7px; font-weight:700; color:var(--accent); text-align:center; }
+
+  /* HIGHLIGHT */
+  .highlight { background:var(--surface); border-radius:16px; padding:18px; border:1px solid var(--border); margin-bottom:20px; }
+  .highlight h3 { font-size:15px; font-weight:700; color:var(--deep); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .highlight ul { padding-left:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .highlight ul li { font-size:12px; color:var(--muted); display:flex; gap:8px; align-items:flex-start; line-height:1.5; }
+  .highlight ul li::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; }
+
+  /* DIVIDER */
+  .divider { height:1px; background:var(--border); margin:8px 20px 24px; }
+
+  /* FOOTER */
+  .footer { background:var(--deep); padding:28px 24px; text-align:center; margin-top:32px; }
+  .footer p { font-size:11px; color:rgba(255,255,255,.4); line-height:1.8; }
+  .footer strong { color:var(--gold-light); display:block; font-size:13px; margin-bottom:6px; }
+
+  /* INSTALL DIAGRAM */
+  .install-row { display:flex; justify-content:space-around; align-items:center; background:var(--surface); border-radius:16px; padding:20px 10px; border:1px solid var(--border); margin-bottom:20px; }
+  .install-step-box { text-align:center; flex:1; }
+  .install-step-icon { font-size:28px; margin-bottom:6px; }
+  .install-step-label { font-size:10px; color:var(--muted); line-height:1.4; font-weight:500; }
+  .install-arrow { font-size:18px; color:var(--border); flex-shrink:0; }
+
+  .url-box { background:var(--deep); border-radius:12px; padding:14px 18px; margin-bottom:20px; display:flex; align-items:center; gap:12px; }
+  .url-box .url-icon { font-size:20px; }
+  .url-box .url-text { color:var(--gold-light); font-size:13px; font-weight:700; letter-spacing:.5px; word-break:break-all; }
+  .url-box .url-sub { color:rgba(255,255,255,.35); font-size:10px; margin-top:2px; }
+
+  @media (max-width: 400px) {
+    .hero-title { font-size:24px; }
+    .install-step-label { font-size:9px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">SSA Cheng San East D2</div>
+  <div class="hero-title">Events App <span>Guide</span></div>
+  <div class="hero-sub">How to view, install & use on your phone</div>
+</div>
+
+<!-- SECTION 1: OPEN THE APP -->
+<div class="section">
+  <br>
+  <div class="section-badge">📱 Step 1</div>
+  <div class="section-title">Open the App</div>
+  <div class="section-sub">Open your phone's browser and go to this link:</div>
+
+  <div class="url-box">
+    <div class="url-icon">🔗</div>
+    <div>
+      <div class="url-text">markleongio.github.io/Sokaevents/</div>
+      <div class="url-sub">Works on any phone — iPhone or Android</div>
+    </div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-header">
+          <div class="phone-header-title">SSA Cheng San East D2 Events</div>
+          <div class="phone-header-sub">Upcoming events</div>
+        </div>
+        <div class="phone-events">
+          <div class="phone-card">
+            <div class="phone-card-date"><div class="phone-card-day">22</div><div class="phone-card-dow">SAT</div></div>
+            <div class="phone-card-body"><div class="phone-card-title">Community Outreach</div><div class="phone-card-meta">🕐 8:30 AM · 📍 Void Deck</div></div>
+          </div>
+          <div class="phone-card">
+            <div class="phone-card-date"><div class="phone-card-day">28</div><div class="phone-card-dow">FRI</div></div>
+            <div class="phone-card-body"><div class="phone-card-title">Monthly Discussion</div><div class="phone-card-meta">🕐 8:00 PM · 📍 Hougang</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: INSTALL -->
+<div class="section">
+  <div class="section-badge">📲 Step 2</div>
+  <div class="section-title">Install on Your Home Screen</div>
+  <div class="section-sub">Add it like an app so you can open it anytime with one tap — no App Store needed!</div>
+
+  <div class="install-row">
+    <div class="install-step-box">
+      <div class="install-step-icon">🔗</div>
+      <div class="install-step-label">Open the link in your browser</div>
+    </div>
+    <div class="install-arrow">›</div>
+    <div class="install-step-box">
+      <div class="install-step-icon">⎙</div>
+      <div class="install-step-label">Tap Share or menu button</div>
+    </div>
+    <div class="install-arrow">›</div>
+    <div class="install-step-box">
+      <div class="install-step-icon">＋</div>
+      <div class="install-step-label">Tap "Add to Home Screen"</div>
+    </div>
+    <div class="install-arrow">›</div>
+    <div class="install-step-box">
+      <div class="install-step-icon">✅</div>
+      <div class="install-step-label">App icon appears on home screen!</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-icon">🍎</div>
+      <div class="step-text">
+        <strong>iPhone (Safari)</strong>
+        <p>Tap the <b>Share button</b> (box with arrow ↑) at the bottom of Safari → scroll down → tap <b>"Add to Home Screen"</b> → tap <b>Add</b></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-icon">🤖</div>
+      <div class="step-text">
+        <strong>Android (Chrome)</strong>
+        <p>Tap the <b>3 dots menu ⋮</b> at the top right → tap <b>"Add to Home screen"</b> or <b>"Install app"</b> → tap <b>Add</b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <div class="tip-icon">💡</div>
+    <p><strong>Tip: Use Safari on iPhone!</strong> The install option only works in Safari. If you're using Chrome on iPhone, copy the link and paste it into Safari first.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: VIEW EVENTS -->
+<div class="section">
+  <div class="section-badge">📅 Using the App</div>
+  <div class="section-title">Viewing Events</div>
+  <div class="section-sub">Browse events by month and tap any event to see full details.</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>Swipe through months</strong>
+        <p>Tap the month tabs at the top (Mar, Apr, May…) to switch between months. Only months with events are shown.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>Tap an event card</strong>
+        <p>Tap any event to open its full detail screen — time, location, and description.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Pinch to zoom in</strong>
+        <p>Place two fingers on the screen and spread them apart to zoom in on the event details for easier reading.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 4: ADD TO CALENDAR -->
+<div class="section">
+  <div class="section-badge">🗓 Feature</div>
+  <div class="section-title">Add Event to Your Calendar</div>
+  <div class="section-sub">Save any event directly to your phone's calendar in seconds.</div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-detail">
+          <div class="phone-detail-title">Community Outreach</div>
+          <div class="phone-detail-row"><span class="phone-detail-icon">🕐</span><span class="phone-detail-text">8:30 AM</span></div>
+          <div class="phone-detail-row"><span class="phone-detail-icon">📍</span><span class="phone-detail-text">Void Deck, Block 5 <span style="background:#f0e8ff;color:#6b3fa0;font-size:6px;padding:1px 4px;border-radius:8px;font-weight:700">🗺 Map</span></span></div>
+          <div class="phone-detail-row"><span class="phone-detail-icon">📝</span><span class="phone-detail-text">Distributing care packs...</span></div>
+          <div class="phone-action-row">
+            <div class="phone-action-cal">📅 Add to Calendar</div>
+            <div class="phone-action-map">🗺 Open Maps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num green">1</div>
+      <div class="step-text">
+        <strong>Open an event</strong>
+        <p>Tap any event card from the main list to open its detail screen.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">2</div>
+      <div class="step-text">
+        <strong>Tap "📅 Add to Calendar"</strong>
+        <p>Scroll down inside the event detail and tap the gold <b>"Add to Calendar"</b> button at the bottom.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-text">
+        <strong>Save in Google Calendar</strong>
+        <p>Google Calendar opens with the event pre-filled. Tap <b>Save</b> (top right) and it's added to your calendar!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <div class="tip-icon">💡</div>
+    <p><strong>iPhone users:</strong> Google Calendar will open in your browser. If you prefer Apple Calendar, you can manually copy the date and time shown in the event details.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 5: OPEN MAPS -->
+<div class="section">
+  <div class="section-badge">🗺 Feature</div>
+  <div class="section-title">Open Location in Maps</div>
+  <div class="section-sub">Get directions to any event venue directly from the app.</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num purple">1</div>
+      <div class="step-text">
+        <strong>Open an event</strong>
+        <p>Tap any event card to open its details.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">2</div>
+      <div class="step-text">
+        <strong>Tap "🗺 Map" or "🗺 Open Maps"</strong>
+        <p>There is a small <b>🗺 Map</b> link beside the location name, and a larger <b>Open Maps</b> button at the bottom of the event.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num purple">3</div>
+      <div class="step-text">
+        <strong>Get directions</strong>
+        <p>Google Maps (or your default maps app) opens with the venue pre-searched. Tap <b>Directions</b> to navigate there.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <h3>✨ What you can do</h3>
+    <ul>
+      <li>Browse all upcoming events by month</li>
+      <li>Tap any event for full details</li>
+      <li>Add events to your Google Calendar with one tap</li>
+      <li>Open venue location in Maps for directions</li>
+      <li>Install the app on your home screen for quick access</li>
+      <li>Events are always up to date — synced to cloud</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>SSA Cheng San East D2 Events</strong>
+  <p>markleongio.github.io/Sokaevents/<br>
+  For help, contact your district admin.</p>
+</div>
+
+</body>
+</html>
