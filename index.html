@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- REST-API-VERSION-20260227-173529 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -205,7 +206,7 @@ const FIREBASE_CONFIG = {
 <div id="loadingScreen">
   <div class="loading-logo">Our <em>Events</em></div>
   <div class="loading-spinner"></div>
-  <div class="loading-status" id="loadingStatus">Connecting to cloud...</div>
+  <div class="loading-status" id="loadingStatus">Loading... (REST v2)</div>
 </div>
 
 <!-- CONFIG WARNING (shown if Firebase not configured) -->
@@ -408,19 +409,25 @@ let activeMonth   = new Date().getMonth();
 let parsedRows    = [];
 
 // ── FIREBASE INIT ──────────────────────────────────────
+function isConfigured() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
+}
+
 async function initFirebase() {
-  // Timeout: if no response in 10s, load sample data
-  const timeoutId = setTimeout(() => {
-    if (allEvents.length === 0) {
-      allEvents = SAMPLE_EVENTS; allVenues = [];
-      hideLoading(); renderApp();
-      syncBadge('error', '⚠️ Could not connect');
-    }
-  }, 10000);
+  if (!isConfigured()) {
+    setLoading('Firebase not configured — using local mode', false);
+    document.getElementById('configBanner').style.display = 'block';
+    // Fall back to localStorage
+    allEvents = JSON.parse(localStorage.getItem('orgapp_events') || 'null') || SAMPLE_EVENTS;
+    appName   = localStorage.getItem('orgapp_name') || 'Our Events';
+    adminPw   = localStorage.getItem('orgapp_pw')   || DEFAULT_PW;
+    hideLoading(); renderApp();
+    return;
+  }
 
   try {
     setLoading('Loading events...', true);
-    const dbURL = "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app"; // hardcoded for reliability
+    const dbURL = FIREBASE_CONFIG.databaseURL;
 
     const res = await fetch(dbURL + '/app.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
