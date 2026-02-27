@@ -10,19 +10,17 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- Firebase compat SDK (works as plain scripts, no module scope issues) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<!-- ✅ STEP 1: Paste your Firebase config below (see setup guide) -->
 <script>
-// ✅ Firebase config
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
-  authDomain:        "soka-d2-events.firebaseapp.com",
-  databaseURL:       "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "soka-d2-events",
-  storageBucket:     "soka-d2-events.firebasestorage.app",
+  apiKey: "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
+  authDomain: "soka-d2-events.firebaseapp.com",
+  databaseURL: "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "soka-d2-events",
+  storageBucket: "soka-d2-events.firebasestorage.app",
   messagingSenderId: "60734290972",
-  appId:             "1:60734290972:web:9c8d62c41dbc10c0a673d9"
+  appId: "1:60734290972:web:9c8d62c41dbc10c0a673d9",
+  measurementId: "G-HYR5Q72W2H"
 };
 </script>
 
@@ -382,8 +380,7 @@ const FIREBASE_CONFIG = {
 
 <!-- Firebase SDK -->
 <script>
-// Firebase compat SDK is loaded via <script> tags above
-// firebase.app(), firebase.database() are available globally
+// Firebase REST API — no SDK needed
 
 // ── CONSTANTS ──────────────────────────────────────────
 const DEFAULT_PW = 'admin123';
@@ -412,9 +409,7 @@ let parsedRows    = [];
 
 // ── FIREBASE INIT ──────────────────────────────────────
 function isConfigured() {
-  return typeof FIREBASE_CONFIG !== 'undefined' && 
-         FIREBASE_CONFIG.apiKey && 
-         !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
 }
 
 async function initFirebase() {
@@ -430,39 +425,51 @@ async function initFirebase() {
   }
 
   try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.database();
     setLoading('Loading events...', true);
+    const dbURL = FIREBASE_CONFIG.databaseURL;
 
-    // Listen for real-time updates
-    db.ref('app').on('value', (snap) => {
-      const data = snap.val() || {};
-      allEvents  = data.events  ? Object.values(data.events)  : SAMPLE_EVENTS;
-      allVenues  = data.venues  ? Object.values(data.venues)  : [];
-      appName    = data.settings?.name     || 'Our Events';
-      adminPw    = data.settings?.password || DEFAULT_PW;
-      hideLoading();
-      renderApp();
-      populateLocationDropdown();
-      syncBadge('synced', '☁️ Cloud synced');
-    }, (err) => {
-      console.error(err);
-      syncBadge('error', '⚠️ Sync error');
-    });
+    const res = await fetch(dbURL + '/app.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
 
-    // Seed sample data if first time
-    const snap = await db.ref('app').get();
-    if (!snap.exists()) {
+    if (!data) {
       const evObj = {};
       SAMPLE_EVENTS.forEach(e => evObj[e.id] = e);
-      await db.ref('app').set({
-        events: evObj,
-        settings: { name: 'Our Events', password: DEFAULT_PW }
+      await fetch(dbURL + '/app.json', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ events: evObj, settings: { name: 'Our Events', password: DEFAULT_PW } })
       });
+      allEvents = SAMPLE_EVENTS; allVenues = []; appName = 'Our Events'; adminPw = DEFAULT_PW;
+    } else {
+      allEvents = data.events  ? Object.values(data.events)  : SAMPLE_EVENTS;
+      allVenues = data.venues  ? Object.values(data.venues)  : [];
+      appName   = data.settings?.name     || 'Our Events';
+      adminPw   = data.settings?.password || DEFAULT_PW;
     }
+
+    clearTimeout(timeoutId);
+    db = dbURL;
+    hideLoading(); renderApp(); populateLocationDropdown();
+    syncBadge('synced', '☁️ Cloud synced');
+
+    // Poll every 30s for updates
+    setInterval(async () => {
+      try {
+        const r = await fetch(dbURL + '/app.json');
+        const d = await r.json(); if (!d) return;
+        allEvents = d.events ? Object.values(d.events) : [];
+        allVenues = d.venues ? Object.values(d.venues) : [];
+        appName   = d.settings?.name     || appName;
+        adminPw   = d.settings?.password || adminPw;
+        renderApp(); populateLocationDropdown();
+      } catch(e) { console.warn('Poll:', e); }
+    }, 30000);
+
   } catch(e) {
-    setLoading('Connection error — using local mode', false);
-    allEvents = SAMPLE_EVENTS;
+    clearTimeout(timeoutId);
+    console.error('Firebase error:', e);
+    allEvents = SAMPLE_EVENTS; allVenues = [];
     hideLoading(); renderApp();
     syncBadge('error', '⚠️ Not connected');
   }
@@ -472,7 +479,11 @@ async function initFirebase() {
 async function dbSet(path, value) {
   if (!db) { localStorage.setItem('orgapp_'+path.replace('/','_'), JSON.stringify(value)); return; }
   syncBadge('syncing', '⏳ Saving...');
-  await db.ref(path).set(value);
+  await fetch(db + '/' + path + '.json', {
+    method: value === null ? 'DELETE' : 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: value === null ? undefined : JSON.stringify(value)
+  });
   syncBadge('synced', '☁️ Saved to cloud');
 }
 
@@ -677,7 +688,7 @@ window.confirmDelete = async function(id) {
   try {
     if (db) {
       // Use Firebase remove() — the correct way to delete a node
-      await db.ref('app/events/' + id).remove();
+      await fetch(db + '/app/events/' + id + '.json', { method: 'DELETE' });
     } else {
       // localStorage fallback
       const events = JSON.parse(localStorage.getItem('orgapp_events') || '[]');
@@ -791,7 +802,7 @@ window.deleteVenue = function(id) {
 
 window.confirmDeleteVenue = async function(id) {
   try {
-    if (db) { await db.ref('app/venues/' + id).remove(); }
+    if (db) { await fetch(db + '/app/venues/' + id + '.json', { method: 'DELETE' }); }
     else { allVenues = allVenues.filter(v => v.id !== id); renderVenueList(); populateLocationDropdown(); }
     showToast('Venue deleted ✓');
   } catch(e) { showToast('Delete failed'); }
