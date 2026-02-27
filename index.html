@@ -202,10 +202,30 @@ const FIREBASE_CONFIG = {
 <body>
 
 <!-- LOADING SCREEN -->
+<div id="errorDisplay" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;font-size:11px;font-family:monospace;padding:10px;z-index:9999;max-height:40vh;overflow-y:auto"></div>
+
+<script>
+window.onerror = function(msg, src, line, col, err) {
+  const el = document.getElementById('errorDisplay');
+  if (el) {
+    el.style.display = 'block';
+    el.innerHTML += '<div><b>ERROR line ' + line + ':</b> ' + msg + '</div>';
+  }
+  return false;
+};
+window.onunhandledrejection = function(e) {
+  const el = document.getElementById('errorDisplay');
+  if (el) {
+    el.style.display = 'block';
+    el.innerHTML += '<div><b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason) + '</div>';
+  }
+};
+</script>
+
 <div id="loadingScreen">
   <div class="loading-logo">Our <em>Events</em></div>
   <div class="loading-spinner"></div>
-  <div class="loading-status" id="loadingStatus">Connecting... v3</div>
+  <div class="loading-status" id="loadingStatus">Connecting to cloud...</div>
 </div>
 
 <!-- CONFIG WARNING (shown if Firebase not configured) -->
