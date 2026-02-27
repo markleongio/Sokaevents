@@ -10,7 +10,21 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- Firebase config is defined inside the module script below -->
+<!-- Firebase compat SDK (works as plain scripts, no module scope issues) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// ✅ Firebase config
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
+  authDomain:        "soka-d2-events.firebaseapp.com",
+  databaseURL:       "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "soka-d2-events",
+  storageBucket:     "soka-d2-events.firebasestorage.app",
+  messagingSenderId: "60734290972",
+  appId:             "1:60734290972:web:9c8d62c41dbc10c0a673d9"
+};
+</script>
 
 <style>
   :root {
@@ -367,20 +381,9 @@
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK -->
-<script type="module">
-import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, get, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-// ✅ Firebase config — edit these values if you change your Firebase project
-const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
-  authDomain:        "soka-d2-events.firebaseapp.com",
-  databaseURL:       "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "soka-d2-events",
-  storageBucket:     "soka-d2-events.firebasestorage.app",
-  messagingSenderId: "60734290972",
-  appId:             "1:60734290972:web:9c8d62c41dbc10c0a673d9"
-};
+<script>
+// Firebase compat SDK is loaded via <script> tags above
+// firebase.app(), firebase.database() are available globally
 
 // ── CONSTANTS ──────────────────────────────────────────
 const DEFAULT_PW = 'admin123';
@@ -409,7 +412,9 @@ let parsedRows    = [];
 
 // ── FIREBASE INIT ──────────────────────────────────────
 function isConfigured() {
-  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
+  return typeof FIREBASE_CONFIG !== 'undefined' && 
+         FIREBASE_CONFIG.apiKey && 
+         !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
 }
 
 async function initFirebase() {
@@ -425,12 +430,12 @@ async function initFirebase() {
   }
 
   try {
-    const app = initializeApp(FIREBASE_CONFIG);
-    db = getDatabase(app);
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
     setLoading('Loading events...', true);
 
     // Listen for real-time updates
-    onValue(ref(db, 'app'), (snap) => {
+    db.ref('app').on('value', (snap) => {
       const data = snap.val() || {};
       allEvents  = data.events  ? Object.values(data.events)  : SAMPLE_EVENTS;
       allVenues  = data.venues  ? Object.values(data.venues)  : [];
@@ -446,11 +451,11 @@ async function initFirebase() {
     });
 
     // Seed sample data if first time
-    const snap = await get(ref(db, 'app'));
+    const snap = await db.ref('app').get();
     if (!snap.exists()) {
       const evObj = {};
       SAMPLE_EVENTS.forEach(e => evObj[e.id] = e);
-      await set(ref(db, 'app'), {
+      await db.ref('app').set({
         events: evObj,
         settings: { name: 'Our Events', password: DEFAULT_PW }
       });
@@ -467,7 +472,7 @@ async function initFirebase() {
 async function dbSet(path, value) {
   if (!db) { localStorage.setItem('orgapp_'+path.replace('/','_'), JSON.stringify(value)); return; }
   syncBadge('syncing', '⏳ Saving...');
-  await set(ref(db, path), value);
+  await db.ref(path).set(value);
   syncBadge('synced', '☁️ Saved to cloud');
 }
 
@@ -672,7 +677,7 @@ window.confirmDelete = async function(id) {
   try {
     if (db) {
       // Use Firebase remove() — the correct way to delete a node
-      await remove(ref(db, 'app/events/' + id));
+      await db.ref('app/events/' + id).remove();
     } else {
       // localStorage fallback
       const events = JSON.parse(localStorage.getItem('orgapp_events') || '[]');
@@ -786,7 +791,7 @@ window.deleteVenue = function(id) {
 
 window.confirmDeleteVenue = async function(id) {
   try {
-    if (db) { await remove(ref(db, 'app/venues/' + id)); }
+    if (db) { await db.ref('app/venues/' + id).remove(); }
     else { allVenues = allVenues.filter(v => v.id !== id); renderVenueList(); populateLocationDropdown(); }
     showToast('Venue deleted ✓');
   } catch(e) { showToast('Delete failed'); }
