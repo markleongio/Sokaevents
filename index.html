@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v20260227071326 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,19 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- ✅ STEP 1: Paste your Firebase config below (see setup guide) -->
-<script>
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
-  authDomain: "soka-d2-events.firebaseapp.com",
-  databaseURL: "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "soka-d2-events",
-  storageBucket: "soka-d2-events.firebasestorage.app",
-  messagingSenderId: "60734290972",
-  appId: "1:60734290972:web:9c8d62c41dbc10c0a673d9",
-  measurementId: "G-HYR5Q72W2H"
-};
-</script>
+<!-- Firebase config is defined inside the module script below -->
 
 <style>
   :root {
@@ -383,6 +370,17 @@ const FIREBASE_CONFIG = {
 <script type="module">
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ✅ Firebase config — edit these values if you change your Firebase project
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
+  authDomain:        "soka-d2-events.firebaseapp.com",
+  databaseURL:       "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "soka-d2-events",
+  storageBucket:     "soka-d2-events.firebasestorage.app",
+  messagingSenderId: "60734290972",
+  appId:             "1:60734290972:web:9c8d62c41dbc10c0a673d9"
+};
 
 // ── CONSTANTS ──────────────────────────────────────────
 const DEFAULT_PW = 'admin123';
