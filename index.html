@@ -9,149 +9,192 @@
 <title id="pageTitle">Our Events</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ✅ STEP 1: Paste your Firebase config below (see setup guide) -->
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAWfBg2VwzBDz94WhqsSKZG9HoFRSu1XSs",
+  authDomain: "soka-d2-events.firebaseapp.com",
+  projectId: "soka-d2-events",
+  storageBucket: "soka-d2-events.firebasestorage.app",
+  messagingSenderId: "60734290972",
+  appId: "1:60734290972:web:9c8d62c41dbc10c0a673d9",
+  measurementId: "G-HYR5Q72W2H"
+};
+</script>
+
 <style>
   :root {
-    --bg: #f7f3ee; --surface: #ffffff; --deep: #1a0a2e;
-    --gold: #b8860b; --gold-light: #d4a843; --gold-pale: #f5e6c0;
-    --text: #1a0a2e; --muted: #7a6e82; --border: #e8ddd0;
-    --accent: #6b3fa0; --accent-soft: #f0e8ff;
-    --red: #c0392b; --green: #16a34a;
+    --bg:#f7f3ee; --surface:#fff; --deep:#1a0a2e;
+    --gold:#b8860b; --gold-light:#d4a843; --gold-pale:#f5e6c0;
+    --text:#1a0a2e; --muted:#7a6e82; --border:#e8ddd0;
+    --accent:#6b3fa0; --accent-soft:#f0e8ff;
+    --red:#c0392b; --green:#16a34a;
   }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; min-height:100dvh; overflow-x:hidden; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden}
+
+  /* LOADING SCREEN */
+  #loadingScreen{position:fixed;inset:0;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;transition:opacity .4s}
+  #loadingScreen.hidden{opacity:0;pointer-events:none}
+  .loading-logo{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:#fff}.loading-logo em{color:var(--gold-light);font-style:italic}
+  .loading-spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--gold-light);border-radius:50%;animation:spin .8s linear infinite}
+  .loading-status{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:1px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* CONFIG BANNER */
+  #configBanner{display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;margin:16px;padding:14px 16px;font-size:12px;color:#856404;line-height:1.6}
+  #configBanner strong{display:block;margin-bottom:4px;font-size:13px}
 
   /* HEADER */
-  .header { background:var(--deep); padding:52px 24px 28px; position:relative; overflow:hidden; }
-  .header::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(184,134,11,.25) 0%,transparent 70%); }
-  .header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 50%,transparent 100%); }
-  .org-label { font-size:10px; letter-spacing:4px; color:var(--gold-light); text-transform:uppercase; margin-bottom:6px; }
-  .org-title { font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:700; color:#fff; line-height:1.1; margin-bottom:4px; }
-  .org-title em { color:var(--gold-light); font-style:italic; }
-  .header-sub { font-size:12px; color:rgba(255,255,255,.45); }
-  .header-actions { position:absolute; top:52px; right:16px; display:flex; gap:8px; }
-  .hdr-btn { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:6px 14px; font-size:11px; color:rgba(255,255,255,.6); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; }
-  .hdr-btn.danger { background:rgba(192,57,43,.2); border-color:rgba(192,57,43,.4); color:#ff8a7a; }
-  .hdr-btn:active { opacity:.7; }
+  .header{background:var(--deep);padding:52px 24px 28px;position:relative;overflow:hidden}
+  .header::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,134,11,.25) 0%,transparent 70%)}
+  .header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 50%,transparent 100%)}
+  .org-label{font-size:10px;letter-spacing:4px;color:var(--gold-light);text-transform:uppercase;margin-bottom:6px}
+  .org-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:4px}
+  .org-title em{color:var(--gold-light);font-style:italic}
+  .header-sub{font-size:12px;color:rgba(255,255,255,.45)}
+  .header-actions{position:absolute;top:52px;right:16px;display:flex;gap:8px}
+  .hdr-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;font-size:11px;color:rgba(255,255,255,.6);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+  .hdr-btn.danger{background:rgba(192,57,43,.2);border-color:rgba(192,57,43,.4);color:#ff8a7a}
+  .hdr-btn:active{opacity:.7}
 
   /* MONTH TABS */
-  .month-tabs-wrap { background:var(--deep); padding:0 16px 16px; overflow-x:auto; scrollbar-width:none; }
-  .month-tabs-wrap::-webkit-scrollbar { display:none; }
-  .month-tabs { display:flex; gap:8px; width:max-content; }
-  .month-tab { padding:7px 16px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.5); background:transparent; transition:all .2s; }
-  .month-tab.active { background:var(--gold); border-color:var(--gold); color:var(--deep); font-weight:600; }
-  .month-tab.has-events { color:rgba(255,255,255,.8); }
+  .month-tabs-wrap{background:var(--deep);padding:0 16px 16px;overflow-x:auto;scrollbar-width:none}
+  .month-tabs-wrap::-webkit-scrollbar{display:none}
+  .month-tabs{display:flex;gap:8px;width:max-content}
+  .month-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);background:transparent;transition:all .2s}
+  .month-tab.active{background:var(--gold);border-color:var(--gold);color:var(--deep);font-weight:600}
+  .month-tab.has-events{color:rgba(255,255,255,.8)}
 
   /* CONTENT */
-  .content { padding:20px 16px 100px; }
-  .month-heading { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; color:var(--deep); margin-bottom:4px; }
-  .month-heading span { color:var(--gold); }
-  .event-count { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:20px; }
-  .no-events { text-align:center; padding:60px 20px; color:var(--muted); }
-  .no-events .icon { font-size:48px; margin-bottom:12px; opacity:.4; }
+  .content{padding:20px 16px 100px}
+  .month-heading{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--deep);margin-bottom:4px}
+  .month-heading span{color:var(--gold)}
+  .event-count{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
+  .no-events{text-align:center;padding:60px 20px;color:var(--muted)}
+  .no-events .icon{font-size:48px;margin-bottom:12px;opacity:.4}
 
   /* EVENT CARD */
-  .event-card { background:var(--surface); border-radius:16px; margin-bottom:12px; overflow:hidden; border:1px solid var(--border); cursor:pointer; transition:transform .15s; display:flex; box-shadow:0 2px 8px rgba(26,10,46,.06); }
-  .event-card:active { transform:scale(.98); }
-  .event-date-bar { width:64px; min-width:64px; background:var(--deep); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 8px; }
-  .event-day { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700; color:var(--gold-light); line-height:1; }
-  .event-dow { font-size:9px; color:rgba(255,255,255,.45); letter-spacing:1.5px; text-transform:uppercase; margin-top:2px; }
-  .event-body { flex:1; padding:14px 14px 14px 16px; border-left:3px solid var(--gold-pale); }
-  .event-title { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; color:var(--deep); line-height:1.2; margin-bottom:6px; }
-  .event-meta-row { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); margin-top:2px; }
-  .event-arrow { display:flex; align-items:center; padding-right:14px; color:var(--gold); font-size:16px; }
+  .event-card{background:var(--surface);border-radius:16px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform .15s;display:flex;box-shadow:0 2px 8px rgba(26,10,46,.06)}
+  .event-card:active{transform:scale(.98)}
+  .event-date-bar{width:64px;min-width:64px;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px}
+  .event-day{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--gold-light);line-height:1}
+  .event-dow{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+  .event-body{flex:1;padding:14px 14px 14px 16px;border-left:3px solid var(--gold-pale)}
+  .event-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--deep);line-height:1.2;margin-bottom:6px}
+  .event-meta-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-top:2px}
+  .event-arrow{display:flex;align-items:center;padding-right:14px;color:var(--gold);font-size:16px}
 
   /* EVENT DETAIL MODAL */
-  .modal-overlay { position:fixed; inset:0; background:rgba(26,10,46,.6); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .3s; }
-  .modal-overlay.open { opacity:1; pointer-events:all; }
-  .modal { background:var(--surface); border-radius:24px 24px 0 0; width:100%; max-height:85vh; overflow-y:auto; transform:translateY(100%); transition:transform .35s cubic-bezier(.34,1.1,.64,1); padding-bottom:40px; }
-  .modal-overlay.open .modal { transform:translateY(0); }
-  .modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:14px auto 0; }
-  .modal-header { background:var(--deep); padding:24px 24px 20px; margin-top:12px; position:relative; }
-  .modal-header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--gold) 0%,transparent 70%); }
-  .modal-date-badge { display:inline-block; background:var(--gold); color:var(--deep); font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px; }
-  .modal-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; color:#fff; line-height:1.2; }
-  .modal-body { padding:24px; }
-  .detail-row { display:flex; gap:14px; margin-bottom:18px; align-items:flex-start; }
-  .detail-icon { width:38px; height:38px; background:var(--gold-pale); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
-  .detail-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
-  .detail-value { font-size:15px; color:var(--text); font-weight:500; line-height:1.4; }
-  .desc-box { background:var(--bg); border-radius:12px; padding:16px; border-left:3px solid var(--gold); margin-top:4px; }
-  .desc-box p { font-size:14px; line-height:1.7; }
-  .modal-close { width:calc(100% - 48px); margin:8px 24px 0; padding:16px; background:var(--deep); color:#fff; border:none; border-radius:14px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; }
+  .modal-overlay{position:fixed;inset:0;background:rgba(26,10,46,.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+  .modal-overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.1,.64,1);padding-bottom:40px}
+  .modal-overlay.open .modal{transform:translateY(0)}
+  .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 0}
+  .modal-header{background:var(--deep);padding:24px 24px 20px;margin-top:12px;position:relative}
+  .modal-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold) 0%,transparent 70%)}
+  .modal-date-badge{display:inline-block;background:var(--gold);color:var(--deep);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+  .modal-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#fff;line-height:1.2}
+  .modal-body{padding:24px}
+  .detail-row{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start}
+  .detail-icon{width:38px;height:38px;background:var(--gold-pale);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .detail-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .detail-value{font-size:15px;color:var(--text);font-weight:500;line-height:1.4}
+  .desc-box{background:var(--bg);border-radius:12px;padding:16px;border-left:3px solid var(--gold);margin-top:4px}
+  .desc-box p{font-size:14px;line-height:1.7}
+  .modal-close{width:calc(100% - 48px);margin:8px 24px 0;padding:16px;background:var(--deep);color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
 
   /* ADMIN MODAL */
-  .admin-modal-overlay { position:fixed; inset:0; background:rgba(26,10,46,.7); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .3s; }
-  .admin-modal-overlay.open { opacity:1; pointer-events:all; }
-  .admin-modal { background:var(--surface); border-radius:24px 24px 0 0; width:100%; max-height:92vh; overflow-y:auto; transform:translateY(100%); transition:transform .35s cubic-bezier(.34,1.1,.64,1); padding-bottom:40px; }
-  .admin-modal-overlay.open .admin-modal { transform:translateY(0); }
-  .admin-header { background:var(--accent); padding:20px 24px; margin-top:12px; }
-  .admin-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; color:#fff; margin-bottom:2px; }
-  .admin-sub { font-size:12px; color:rgba(255,255,255,.6); }
-  .pw-screen { padding:32px 24px; }
-  .pw-label { font-size:13px; color:var(--muted); margin-bottom:8px; }
-  .pw-input { width:100%; padding:14px 16px; border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:16px; color:var(--text); background:var(--bg); outline:none; margin-bottom:8px; }
-  .pw-input:focus { border-color:var(--accent); }
-  .pw-error { font-size:12px; color:var(--red); margin-bottom:12px; min-height:16px; }
-  .btn-primary { width:100%; padding:15px; background:var(--accent); color:#fff; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:10px; }
-  .btn-secondary { width:100%; padding:15px; background:transparent; color:var(--muted); border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:15px; cursor:pointer; }
-  .admin-panel { padding:20px 24px; display:none; }
-  .admin-panel.visible { display:block; }
-  .admin-section-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; color:var(--deep); margin-bottom:14px; }
-  .admin-event-item { background:var(--bg); border-radius:12px; padding:14px; margin-bottom:10px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .admin-event-name { font-size:14px; font-weight:500; color:var(--deep); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .admin-event-date { font-size:11px; color:var(--muted); margin-top:2px; }
-  .admin-actions { display:flex; gap:8px; flex-shrink:0; }
-  .btn-edit,.btn-del { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; }
-  .btn-edit { background:var(--accent-soft); color:var(--accent); }
-  .btn-del  { background:#fdecea; color:var(--red); }
-  .form-group { margin-bottom:14px; }
-  .form-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:block; font-weight:500; }
-  .form-input,.form-textarea { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); outline:none; }
-  .form-input:focus,.form-textarea:focus { border-color:var(--accent); }
-  .form-textarea { min-height:80px; resize:vertical; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .divider { height:1px; background:var(--border); margin:20px 0; }
-  .save-msg { font-size:12px; font-weight:600; min-height:16px; margin-top:6px; }
-  .save-msg.ok  { color:var(--green); }
-  .save-msg.err { color:var(--red); }
-
-  /* APP NAME ROW */
-  .inline-row { display:flex; gap:10px; }
-  .inline-row .form-input { flex:1; }
-  .btn-inline { padding:12px 16px; background:var(--accent-soft); color:var(--accent); border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .admin-modal-overlay{position:fixed;inset:0;background:rgba(26,10,46,.7);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+  .admin-modal-overlay.open{opacity:1;pointer-events:all}
+  .admin-modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.1,.64,1);padding-bottom:40px}
+  .admin-modal-overlay.open .admin-modal{transform:translateY(0)}
+  .admin-header{background:var(--accent);padding:20px 24px;margin-top:12px}
+  .admin-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:2px}
+  .admin-sub{font-size:12px;color:rgba(255,255,255,.6)}
+  .pw-screen{padding:32px 24px}
+  .pw-label{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .pw-input{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);background:var(--bg);outline:none;margin-bottom:8px}
+  .pw-input:focus{border-color:var(--accent)}
+  .pw-error{font-size:12px;color:var(--red);margin-bottom:12px;min-height:16px}
+  .btn-primary{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px}
+  .btn-secondary{width:100%;padding:15px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer}
+  .admin-panel{padding:20px 24px;display:none}
+  .admin-panel.visible{display:block}
+  .admin-section-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--deep);margin-bottom:14px}
+  .admin-event-item{background:var(--bg);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .admin-event-name{font-size:14px;font-weight:500;color:var(--deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .admin-event-date{font-size:11px;color:var(--muted);margin-top:2px}
+  .admin-actions{display:flex;gap:8px;flex-shrink:0}
+  .btn-edit,.btn-del{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+  .btn-edit{background:var(--accent-soft);color:var(--accent)}
+  .btn-del{background:#fdecea;color:var(--red)}
+  .form-group{margin-bottom:14px}
+  .form-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;font-weight:500}
+  .form-input,.form-textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none}
+  .form-input:focus,.form-textarea:focus{border-color:var(--accent)}
+  .form-textarea{min-height:80px;resize:vertical}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .divider{height:1px;background:var(--border);margin:20px 0}
+  .save-msg{font-size:12px;font-weight:600;min-height:16px;margin-top:6px}
+  .save-msg.ok{color:var(--green)}
+  .save-msg.err{color:var(--red)}
+  .inline-row{display:flex;gap:10px}
+  .inline-row .form-input{flex:1}
+  .btn-inline{padding:12px 16px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 
   /* CSV */
-  .csv-drop { border:2px dashed var(--border); border-radius:14px; padding:22px; text-align:center; background:var(--bg); cursor:pointer; transition:border-color .2s,background .2s; margin-bottom:10px; }
-  .csv-drop:hover { border-color:var(--accent); background:var(--accent-soft); }
-  .csv-drop-icon { font-size:28px; margin-bottom:6px; }
-  .csv-drop-text { font-size:13px; font-weight:600; color:var(--deep); margin-bottom:2px; }
-  .csv-drop-sub  { font-size:11px; color:var(--muted); }
-  .csv-preview { background:var(--bg); border-radius:10px; padding:12px; border:1px solid var(--border); margin-top:8px; font-size:11px; color:var(--deep); font-family:monospace; max-height:90px; overflow-y:auto; white-space:pre-wrap; display:none; }
-  .btn-template { width:100%; padding:12px; background:var(--gold-pale); color:var(--gold); border:1.5px solid var(--gold); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:10px; }
-  .btn-import   { width:100%; padding:13px; background:var(--green); color:#fff; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; display:none; }
-  .csv-note { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
+  .csv-drop{border:2px dashed var(--border);border-radius:14px;padding:22px;text-align:center;background:var(--bg);cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:10px}
+  .csv-drop:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .csv-drop-icon{font-size:28px;margin-bottom:6px}
+  .csv-drop-text{font-size:13px;font-weight:600;color:var(--deep);margin-bottom:2px}
+  .csv-drop-sub{font-size:11px;color:var(--muted)}
+  .csv-preview{background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border);margin-top:8px;font-size:11px;color:var(--deep);font-family:monospace;max-height:90px;overflow-y:auto;white-space:pre-wrap;display:none}
+  .btn-template{width:100%;padding:12px;background:var(--gold-pale);color:var(--gold);border:1.5px solid var(--gold);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px}
+  .btn-import{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;display:none}
+  .csv-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+  /* CLOUD SYNC INDICATOR */
+  .sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;margin-bottom:12px}
+  .sync-badge.syncing{background:#fff3cd;color:#856404}
+  .sync-badge.synced{background:#d1fae5;color:#065f46}
+  .sync-badge.error{background:#fdecea;color:var(--red)}
 
   /* CLOSE CONFIRM */
-  .close-overlay { position:fixed; inset:0; background:rgba(26,10,46,.75); backdrop-filter:blur(6px); z-index:400; display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .2s; }
-  .close-overlay.open { opacity:1; pointer-events:all; }
-  .close-box { background:var(--surface); border-radius:20px; padding:28px 24px; width:100%; max-width:320px; text-align:center; transform:scale(.9); transition:transform .25s cubic-bezier(.34,1.3,.64,1); }
-  .close-overlay.open .close-box { transform:scale(1); }
-  .close-box-icon  { font-size:40px; margin-bottom:12px; }
-  .close-box-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:var(--deep); margin-bottom:6px; }
-  .close-box-sub   { font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.5; }
-  .close-box-btns  { display:flex; gap:10px; }
-  .btn-do-close  { flex:1; padding:14px; background:var(--red); color:#fff; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
-  .btn-no-close  { flex:1; padding:14px; background:var(--bg); color:var(--muted); border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; }
+  .close-overlay{position:fixed;inset:0;background:rgba(26,10,46,.75);backdrop-filter:blur(6px);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .close-overlay.open{opacity:1;pointer-events:all}
+  .close-box{background:var(--surface);border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center;transform:scale(.9);transition:transform .25s cubic-bezier(.34,1.3,.64,1)}
+  .close-overlay.open .close-box{transform:scale(1)}
+  .close-box-icon{font-size:40px;margin-bottom:12px}
+  .close-box-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--deep);margin-bottom:6px}
+  .close-box-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+  .close-box-btns{display:flex;gap:10px}
+  .btn-do-close{flex:1;padding:14px;background:var(--red);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+  .btn-no-close{flex:1;padding:14px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer}
 
   /* TOAST */
-  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--deep); color:#fff; font-size:13px; font-weight:500; padding:12px 24px; border-radius:100px; transition:transform .3s cubic-bezier(.34,1.56,.64,1); z-index:500; white-space:nowrap; border:1px solid var(--gold); }
-  .toast.show { transform:translateX(-50%) translateY(0); }
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--deep);color:#fff;font-size:13px;font-weight:500;padding:12px 24px;border-radius:100px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:500;white-space:nowrap;border:1px solid var(--gold)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
 
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .event-card { animation:fadeUp .3s ease both; }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .event-card{animation:fadeUp .3s ease both}
 </style>
 </head>
 <body>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="loading-logo">Our <em>Events</em></div>
+  <div class="loading-spinner"></div>
+  <div class="loading-status" id="loadingStatus">Connecting to cloud...</div>
+</div>
+
+<!-- CONFIG WARNING (shown if Firebase not configured) -->
+<div id="configBanner">
+  <strong>⚠️ Firebase not configured yet</strong>
+  Open this file in a text editor, find <code>FIREBASE_CONFIG</code> at the top, and paste in your Firebase credentials. See the setup guide for instructions.
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -189,10 +232,8 @@
     <div class="modal-handle" style="margin-top:12px"></div>
     <div class="admin-header">
       <div class="admin-title">Admin Panel</div>
-      <div class="admin-sub">Manage your organisation's events</div>
+      <div class="admin-sub">Changes sync to cloud instantly ☁️</div>
     </div>
-
-    <!-- Login -->
     <div class="pw-screen" id="pwScreen">
       <div class="pw-label">Enter admin password to continue</div>
       <input type="password" class="pw-input" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
@@ -200,11 +241,9 @@
       <button class="btn-primary" onclick="checkPw()">Enter</button>
       <button class="btn-secondary" onclick="closeAdminFull()">Cancel</button>
     </div>
-
-    <!-- Panel -->
     <div class="admin-panel" id="adminPanel">
 
-      <!-- A) APP NAME -->
+      <!-- APP NAME -->
       <div class="admin-section-title">✏️ App Name</div>
       <div class="form-group">
         <label class="form-label">Calendar Title</label>
@@ -214,11 +253,11 @@
         </div>
         <div class="save-msg ok" id="appNameMsg"></div>
       </div>
-
       <div class="divider"></div>
 
-      <!-- B) ADD / EDIT EVENT -->
+      <!-- ADD/EDIT EVENT -->
       <div class="admin-section-title">➕ Add / Edit Event</div>
+      <div id="syncBadge" class="sync-badge synced">☁️ Cloud connected</div>
       <input type="hidden" id="editId">
       <div class="form-group">
         <label class="form-label">Event Title *</label>
@@ -245,39 +284,35 @@
       <button class="btn-primary" onclick="saveEvent()" style="margin-bottom:8px">💾 Save Event</button>
       <button class="btn-secondary" onclick="clearForm()">Clear Form</button>
       <div class="save-msg" id="saveMsg"></div>
-
       <div class="divider"></div>
 
-      <!-- C) CSV IMPORT -->
+      <!-- CSV IMPORT -->
       <div class="admin-section-title">📂 Import via CSV</div>
       <button class="btn-template" onclick="downloadTemplate()">⬇️ Download CSV Template</button>
       <div class="csv-drop" onclick="document.getElementById('csvFile').click()">
         <div class="csv-drop-icon">📄</div>
-        <div class="csv-drop-text">Tap to upload your CSV file</div>
+        <div class="csv-drop-text">Tap to upload CSV file</div>
         <div class="csv-drop-sub">Columns: title, date, time, location, description</div>
       </div>
       <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCSV(this)">
       <div class="csv-preview" id="csvPreview"></div>
       <div class="save-msg" id="csvMsg"></div>
       <button class="btn-import" id="btnImport" onclick="importCSV()">✅ Import &amp; Replace All Events</button>
-      <p class="csv-note">⚠️ Importing will <strong>replace</strong> all current events. Download a backup by exporting first.</p>
-
+      <p class="csv-note">⚠️ Importing replaces all current events.</p>
       <div class="divider"></div>
 
-      <!-- D) ALL EVENTS -->
+      <!-- ALL EVENTS -->
       <div class="admin-section-title">📋 All Events</div>
       <div id="adminEventList"></div>
-
       <div class="divider"></div>
 
-      <!-- E) PASSWORD -->
+      <!-- CHANGE PASSWORD -->
       <div class="admin-section-title">🔑 Change Password</div>
       <div class="inline-row" style="margin-bottom:6px">
-        <input type="password" class="form-input" id="newPwInput" placeholder="New password">
+        <input type="password" class="form-input" id="newPwInput" placeholder="New password (min 4 chars)">
         <button class="btn-inline" onclick="changePassword()">Update</button>
       </div>
-      <div class="save-msg ok" id="pwChangeMsg"></div>
-
+      <div class="save-msg" id="pwChangeMsg"></div>
       <div style="height:20px"></div>
       <button class="btn-secondary" onclick="closeAdminFull()">Logout &amp; Close</button>
     </div>
@@ -289,7 +324,7 @@
   <div class="close-box">
     <div class="close-box-icon">👋</div>
     <div class="close-box-title">Close App?</div>
-    <div class="close-box-sub">This will close the events calendar. Reopen anytime from your home screen.</div>
+    <div class="close-box-sub">Press your phone's home button or reopen from your home screen anytime.</div>
     <div class="close-box-btns">
       <button class="btn-do-close" onclick="doClose()">Yes, Close</button>
       <button class="btn-no-close" onclick="cancelClose()">Cancel</button>
@@ -299,67 +334,146 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-const EVENTS_KEY = 'orgapp_events';
-const PW_KEY     = 'orgapp_pw';
-const NAME_KEY   = 'orgapp_name';
-const DEFAULT_PW = 'admin123';
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, get, onValue }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
+// ── CONSTANTS ──────────────────────────────────────────
+const DEFAULT_PW = 'admin123';
 const MONTHS       = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAYS         = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 const SAMPLE_EVENTS = [
-  {id:1,title:"Sunday Service",        date:"2026-03-01",time:"09:00",location:"Main Sanctuary",    desc:"Weekly Sunday worship service. All members and guests welcome."},
-  {id:2,title:"Youth Fellowship Night",date:"2026-03-14",time:"19:00",location:"Youth Hall, Level 2",desc:"Monthly gathering for all youth members aged 13–25."},
-  {id:3,title:"Community Outreach",    date:"2026-03-22",time:"08:30",location:"Void Deck, Block 5",desc:"Quarterly community service — distributing care packs to elderly residents."},
-  {id:4,title:"Prayer & Fasting Week", date:"2026-04-06",time:"06:30",location:"Prayer Room",       desc:"Annual week of corporate prayer and fasting."},
-  {id:5,title:"Easter Celebration",    date:"2026-04-05",time:"10:00",location:"Main Sanctuary",    desc:"Special Easter Sunday service with full choir and guest speaker."},
-  {id:6,title:"Volunteer Training",    date:"2026-05-10",time:"09:00",location:"Conference Room A", desc:"Training for all new and existing volunteers."},
+  {id:'ev1',title:"Sunday Service",        date:"2026-03-01",time:"09:00",location:"Main Sanctuary",     desc:"Weekly Sunday worship service. All members and guests welcome."},
+  {id:'ev2',title:"Youth Fellowship Night",date:"2026-03-14",time:"19:00",location:"Youth Hall, Level 2",desc:"Monthly gathering for all youth members aged 13–25."},
+  {id:'ev3',title:"Community Outreach",    date:"2026-03-22",time:"08:30",location:"Void Deck, Block 5", desc:"Quarterly community service — distributing care packs to elderly residents."},
+  {id:'ev4',title:"Prayer & Fasting Week", date:"2026-04-06",time:"06:30",location:"Prayer Room",        desc:"Annual week of corporate prayer and fasting."},
+  {id:'ev5',title:"Easter Celebration",    date:"2026-04-05",time:"10:00",location:"Main Sanctuary",     desc:"Special Easter Sunday service with full choir and guest speaker."},
+  {id:'ev6',title:"Volunteer Training",    date:"2026-05-10",time:"09:00",location:"Conference Room A",  desc:"Training for all new and existing volunteers."},
 ];
 
-function getEvents()   { try{ const s=localStorage.getItem(EVENTS_KEY); return s?JSON.parse(s):SAMPLE_EVENTS; }catch{return SAMPLE_EVENTS;} }
-function saveEvents(e) { localStorage.setItem(EVENTS_KEY,JSON.stringify(e)); }
-function getPassword() { return localStorage.getItem(PW_KEY)||DEFAULT_PW; }
-function getAppName()  { return localStorage.getItem(NAME_KEY)||'Our Events'; }
+// ── STATE ──────────────────────────────────────────────
+let db = null;
+let allEvents = [];
+let appName   = 'Our Events';
+let adminPw   = DEFAULT_PW;
+let adminLoggedIn = false;
+let activeMonth   = new Date().getMonth();
+let parsedRows    = [];
 
-let activeMonth = new Date().getMonth();
+// ── FIREBASE INIT ──────────────────────────────────────
+function isConfigured() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
+}
 
-function init() {
-  if (!localStorage.getItem(EVENTS_KEY)) saveEvents(SAMPLE_EVENTS);
-  const name = getAppName();
-  document.getElementById('orgLabel').textContent  = name;
-  document.getElementById('pageTitle').textContent = name;
-  const events = getEvents();
-  const months = [...new Set(events.map(e=>new Date(e.date+'T00:00:00').getMonth()))].sort((a,b)=>a-b);
+async function initFirebase() {
+  if (!isConfigured()) {
+    setLoading('Firebase not configured — using local mode', false);
+    document.getElementById('configBanner').style.display = 'block';
+    // Fall back to localStorage
+    allEvents = JSON.parse(localStorage.getItem('orgapp_events') || 'null') || SAMPLE_EVENTS;
+    appName   = localStorage.getItem('orgapp_name') || 'Our Events';
+    adminPw   = localStorage.getItem('orgapp_pw')   || DEFAULT_PW;
+    hideLoading(); renderApp();
+    return;
+  }
+
+  try {
+    const app = initializeApp(FIREBASE_CONFIG);
+    db = getDatabase(app);
+    setLoading('Loading events...', true);
+
+    // Listen for real-time updates
+    onValue(ref(db, 'app'), (snap) => {
+      const data = snap.val() || {};
+      allEvents = data.events ? Object.values(data.events) : SAMPLE_EVENTS;
+      appName   = data.settings?.name || 'Our Events';
+      adminPw   = data.settings?.password || DEFAULT_PW;
+      hideLoading();
+      renderApp();
+      syncBadge('synced', '☁️ Cloud synced');
+    }, (err) => {
+      console.error(err);
+      syncBadge('error', '⚠️ Sync error');
+    });
+
+    // Seed sample data if first time
+    const snap = await get(ref(db, 'app'));
+    if (!snap.exists()) {
+      const evObj = {};
+      SAMPLE_EVENTS.forEach(e => evObj[e.id] = e);
+      await set(ref(db, 'app'), {
+        events: evObj,
+        settings: { name: 'Our Events', password: DEFAULT_PW }
+      });
+    }
+  } catch(e) {
+    setLoading('Connection error — using local mode', false);
+    allEvents = SAMPLE_EVENTS;
+    hideLoading(); renderApp();
+    syncBadge('error', '⚠️ Not connected');
+  }
+}
+
+// Write helpers
+async function dbSet(path, value) {
+  if (!db) { localStorage.setItem('orgapp_'+path.replace('/','_'), JSON.stringify(value)); return; }
+  syncBadge('syncing', '⏳ Saving...');
+  await set(ref(db, path), value);
+  syncBadge('synced', '☁️ Saved to cloud');
+}
+
+function syncBadge(type, text) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  el.className = 'sync-badge ' + type;
+  el.textContent = text;
+}
+
+function setLoading(text, show) {
+  document.getElementById('loadingStatus').textContent = text;
+}
+function hideLoading() {
+  const el = document.getElementById('loadingScreen');
+  el.classList.add('hidden');
+  setTimeout(() => el.style.display = 'none', 500);
+}
+
+// ── RENDER ─────────────────────────────────────────────
+function renderApp() {
+  document.getElementById('orgLabel').textContent  = appName;
+  document.getElementById('pageTitle').textContent = appName;
+  const months = [...new Set(allEvents.map(e => new Date(e.date+'T00:00:00').getMonth()))].sort((a,b)=>a-b);
   if (!months.includes(activeMonth) && months.length) activeMonth = months[0];
-  renderTabs(months); renderEvents();
+  renderTabs(months);
+  renderEvents();
 }
 
 function renderTabs(months) {
-  const el = document.getElementById('monthTabs'); el.innerHTML='';
-  months.forEach(i=>{
-    const t=document.createElement('div');
-    t.className='month-tab has-events'+(i===activeMonth?' active':'');
-    t.textContent=SHORT_MONTHS[i];
-    t.onclick=()=>{activeMonth=i;init();};
+  const el = document.getElementById('monthTabs'); el.innerHTML = '';
+  months.forEach(i => {
+    const t = document.createElement('div');
+    t.className = 'month-tab has-events' + (i===activeMonth?' active':'');
+    t.textContent = SHORT_MONTHS[i];
+    t.onclick = () => { activeMonth = i; renderApp(); };
     el.appendChild(t);
   });
 }
 
 function renderEvents() {
-  const events = getEvents();
-  const me = events.filter(e=>new Date(e.date+'T00:00:00').getMonth()===activeMonth).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const me = allEvents.filter(e=>new Date(e.date+'T00:00:00').getMonth()===activeMonth).sort((a,b)=>new Date(a.date)-new Date(b.date));
   const yr = me.length ? new Date(me[0].date+'T00:00:00').getFullYear() : new Date().getFullYear();
-  document.getElementById('headerSub').textContent = `${events.length} event${events.length!==1?'s':''} scheduled`;
+  document.getElementById('headerSub').textContent = `${allEvents.length} event${allEvents.length!==1?'s':''} scheduled`;
   let h = `<div class="month-heading">${MONTHS[activeMonth]} <span>${yr}</span></div>
            <div class="event-count">${me.length} event${me.length!==1?'s':''} this month</div>`;
   if (!me.length) {
-    h+=`<div class="no-events"><div class="icon">📭</div><p>No events for ${MONTHS[activeMonth]}</p></div>`;
+    h += `<div class="no-events"><div class="icon">📭</div><p>No events for ${MONTHS[activeMonth]}</p></div>`;
   } else {
-    me.forEach((ev,i)=>{
-      const d=new Date(ev.date+'T00:00:00');
-      h+=`<div class="event-card" style="animation-delay:${i*.06}s" onclick="openEvent(${ev.id})">
+    me.forEach((ev,i) => {
+      const d = new Date(ev.date+'T00:00:00');
+      h += `<div class="event-card" style="animation-delay:${i*.06}s" onclick="openEvent('${ev.id}')">
         <div class="event-date-bar"><div class="event-day">${d.getDate()}</div><div class="event-dow">${DAYS[d.getDay()]}</div></div>
         <div class="event-body">
           <div class="event-title">${ev.title}</div>
@@ -370,73 +484,115 @@ function renderEvents() {
       </div>`;
     });
   }
-  document.getElementById('content').innerHTML=h;
+  document.getElementById('content').innerHTML = h;
 }
 
 function ft(t){ const[h,m]=t.split(':').map(Number); return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`; }
 
-// Event detail
-function openEvent(id) {
-  if(navigator.vibrate)navigator.vibrate(20);
-  const ev=getEvents().find(e=>e.id===id); if(!ev)return;
-  const d=new Date(ev.date+'T00:00:00');
-  document.getElementById('modalDateBadge').textContent=`${DAYS[d.getDay()]}, ${d.getDate()} ${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  document.getElementById('modalTitle').textContent=ev.title;
+// ── EVENT DETAIL ───────────────────────────────────────
+window.openEvent = function(id) {
+  if(navigator.vibrate) navigator.vibrate(20);
+  const ev = allEvents.find(e=>e.id===id); if(!ev) return;
+  const d = new Date(ev.date+'T00:00:00');
+  document.getElementById('modalDateBadge').textContent = `${DAYS[d.getDay()]}, ${d.getDate()} ${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('modalTitle').textContent = ev.title;
   let b='';
   if(ev.time)     b+=`<div class="detail-row"><div class="detail-icon">🕐</div><div><div class="detail-label">Time</div><div class="detail-value">${ft(ev.time)}</div></div></div>`;
   if(ev.location) b+=`<div class="detail-row"><div class="detail-icon">📍</div><div><div class="detail-label">Location</div><div class="detail-value">${ev.location}</div></div></div>`;
   if(ev.desc)     b+=`<div class="detail-row"><div class="detail-icon">📝</div><div style="flex:1"><div class="detail-label">Details</div><div class="desc-box"><p>${ev.desc}</p></div></div></div>`;
-  document.getElementById('modalBody').innerHTML=b;
+  document.getElementById('modalBody').innerHTML = b;
   document.getElementById('eventModal').classList.add('open');
-}
-function closeModal(){ document.getElementById('eventModal').classList.remove('open'); }
+};
+window.closeModal = () => document.getElementById('eventModal').classList.remove('open');
 
-// Admin
-let adminLoggedIn=false;
-function openAdmin(){ document.getElementById('adminModal').classList.add('open'); document.getElementById('pwInput').value=''; document.getElementById('pwError').textContent=''; adminLoggedIn?showPanel():null; if(!adminLoggedIn){document.getElementById('pwScreen').style.display='block';document.getElementById('adminPanel').classList.remove('visible');} }
-function closeAdminFull(){ document.getElementById('adminModal').classList.remove('open'); adminLoggedIn=false; }
-function checkPw(){
-  const stored = localStorage.getItem(PW_KEY) || DEFAULT_PW;
-  if(document.getElementById('pwInput').value === stored){
-    adminLoggedIn=true; showPanel();
+// ── ADMIN ──────────────────────────────────────────────
+window.openAdmin = function() {
+  document.getElementById('adminModal').classList.add('open');
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  if (adminLoggedIn) showPanel();
+  else { document.getElementById('pwScreen').style.display='block'; document.getElementById('adminPanel').classList.remove('visible'); }
+};
+window.closeAdminFull = function() {
+  document.getElementById('adminModal').classList.remove('open');
+  adminLoggedIn = false;
+};
+window.checkPw = function() {
+  if (document.getElementById('pwInput').value === adminPw) {
+    adminLoggedIn = true; showPanel();
   } else {
-    document.getElementById('pwError').textContent='✗ Incorrect password';
-    if(navigator.vibrate)navigator.vibrate([30,50,30]);
+    document.getElementById('pwError').textContent = '✗ Incorrect password';
+    if(navigator.vibrate) navigator.vibrate([30,50,30]);
   }
+};
+function showPanel() {
+  document.getElementById('pwScreen').style.display = 'none';
+  document.getElementById('adminPanel').classList.add('visible');
+  document.getElementById('appNameInput').value = appName;
+  renderAdminList();
 }
-function showPanel(){ document.getElementById('pwScreen').style.display='none'; document.getElementById('adminPanel').classList.add('visible'); document.getElementById('appNameInput').value=getAppName(); renderAdminList(); }
 
-// App name
-function saveAppName(){ const v=document.getElementById('appNameInput').value.trim(); if(!v){msg('appNameMsg','✗ Please enter a name',false);return;} localStorage.setItem(NAME_KEY,v); init(); msg('appNameMsg','✓ App name updated!',true); showToast('App name saved ✓'); }
+// ── APP NAME ───────────────────────────────────────────
+window.saveAppName = async function() {
+  const v = document.getElementById('appNameInput').value.trim();
+  if (!v) { msg('appNameMsg','✗ Please enter a name',false); return; }
+  appName = v;
+  await dbSet('app/settings/name', v);
+  renderApp();
+  msg('appNameMsg','✓ App name updated!',true);
+  showToast('App name saved ✓');
+};
 
-// Event form
-function clearForm(){ ['editId','fTitle','fDate','fTime','fLocation','fDesc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('saveMsg').textContent=''; }
-function editEvent(id){ const ev=getEvents().find(e=>e.id===id); if(!ev)return; document.getElementById('editId').value=id; document.getElementById('fTitle').value=ev.title; document.getElementById('fDate').value=ev.date; document.getElementById('fTime').value=ev.time||''; document.getElementById('fLocation').value=ev.location||''; document.getElementById('fDesc').value=ev.desc||''; document.getElementById('saveMsg').textContent=''; document.getElementById('adminPanel').scrollTop=0; }
-function saveEvent(){ const t=document.getElementById('fTitle').value.trim(), d=document.getElementById('fDate').value; if(!t||!d){msg('saveMsg','✗ Title and date required',false);return;} const events=getEvents(),eid=document.getElementById('editId').value,ev={title:t,date:d,time:document.getElementById('fTime').value,location:document.getElementById('fLocation').value.trim(),desc:document.getElementById('fDesc').value.trim()}; if(eid){const i=events.findIndex(e=>e.id===parseInt(eid));if(i!==-1)events[i]={...events[i],...ev};}else{ev.id=Date.now();events.push(ev);} saveEvents(events); clearForm(); renderAdminList(); init(); msg('saveMsg','✓ Event saved!',true); showToast(eid?'Event updated ✓':'Event added ✓'); }
-function deleteEvent(id){
-  // Show inline confirm row instead of confirm() which is blocked on mobile PWAs
-  const item = document.getElementById('del-item-'+id);
-  if(!item) return;
+// ── EVENT FORM ─────────────────────────────────────────
+window.clearForm = function() {
+  ['editId','fTitle','fDate','fTime','fLocation','fDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('saveMsg').textContent='';
+};
+window.editEvent = function(id) {
+  const ev = allEvents.find(e=>e.id===id); if(!ev) return;
+  document.getElementById('editId').value    = id;
+  document.getElementById('fTitle').value    = ev.title;
+  document.getElementById('fDate').value     = ev.date;
+  document.getElementById('fTime').value     = ev.time||'';
+  document.getElementById('fLocation').value = ev.location||'';
+  document.getElementById('fDesc').value     = ev.desc||'';
+  document.getElementById('saveMsg').textContent='';
+  document.getElementById('adminPanel').scrollTop=0;
+};
+window.saveEvent = async function() {
+  const title=document.getElementById('fTitle').value.trim(), date=document.getElementById('fDate').value;
+  if(!title||!date){msg('saveMsg','✗ Title and date required',false);return;}
+  const eid = document.getElementById('editId').value;
+  const id  = eid || 'ev'+Date.now();
+  const ev  = {id,title,date,time:document.getElementById('fTime').value,location:document.getElementById('fLocation').value.trim(),desc:document.getElementById('fDesc').value.trim()};
+  await dbSet('app/events/'+id, ev);
+  clearForm();
+  msg('saveMsg','✓ Event saved to cloud!',true);
+  showToast(eid?'Event updated ✓':'Event added ✓');
+};
+window.deleteEvent = function(id) {
+  const item = document.getElementById('del-item-'+id); if(!item) return;
   const existing = document.getElementById('del-confirm-'+id);
-  if(existing){ existing.remove(); return; }
-  const confirmRow = document.createElement('div');
-  confirmRow.id = 'del-confirm-'+id;
-  confirmRow.style.cssText = 'margin-top:8px;background:#fdecea;border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px';
-  confirmRow.innerHTML = `<span style="font-size:12px;color:var(--red);font-weight:500">Delete this event?</span>
+  if(existing){existing.remove();return;}
+  const row = document.createElement('div');
+  row.id = 'del-confirm-'+id;
+  row.style.cssText='margin-top:8px;background:#fdecea;border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px';
+  row.innerHTML=`<span style="font-size:12px;color:var(--red);font-weight:500">Delete this event?</span>
     <div style="display:flex;gap:6px">
-      <button onclick="confirmDelete(${id})" style="padding:5px 12px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Yes</button>
+      <button onclick="confirmDelete('${id}')" style="padding:5px 12px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Yes</button>
       <button onclick="document.getElementById('del-confirm-${id}').remove()" style="padding:5px 12px;background:#ddd;color:#555;border:none;border-radius:6px;font-size:12px;cursor:pointer">No</button>
     </div>`;
-  item.appendChild(confirmRow);
-}
-function confirmDelete(id){
-  saveEvents(getEvents().filter(e=>e.id!==id));
-  renderAdminList(); init(); showToast('Event deleted');
-}
+  item.appendChild(row);
+};
+window.confirmDelete = async function(id) {
+  // Set to null deletes in Firebase Realtime Database
+  await dbSet('app/events/'+id, null);
+  showToast('Event deleted');
+};
 
-function renderAdminList(){
-  const events=getEvents().sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const el=document.getElementById('adminEventList');
+function renderAdminList() {
+  const events = [...allEvents].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const el = document.getElementById('adminEventList');
   if(!events.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">No events yet.</p>';return;}
   el.innerHTML=events.map(ev=>{
     const d=new Date(ev.date+'T00:00:00');
@@ -446,21 +602,23 @@ function renderAdminList(){
         <div class="admin-event-date">${d.getDate()} ${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}${ev.time?' · '+ft(ev.time):''}</div>
       </div>
       <div class="admin-actions">
-        <button class="btn-edit" onclick="editEvent(${ev.id})">Edit</button>
-        <button class="btn-del"  onclick="deleteEvent(${ev.id})">Del</button>
+        <button class="btn-edit" onclick="editEvent('${ev.id}')">Edit</button>
+        <button class="btn-del"  onclick="deleteEvent('${ev.id}')">Del</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// Password
-function changePassword(){
-  const p=document.getElementById('newPwInput').value.trim();
+// ── CHANGE PASSWORD ────────────────────────────────────
+window.changePassword = async function() {
+  const p = document.getElementById('newPwInput').value.trim();
   if(!p||p.length<4){msg('pwChangeMsg','✗ Min 4 characters',false);return;}
-  localStorage.setItem(PW_KEY, p);
+  adminPw = p;
+  await dbSet('app/settings/password', p);
   document.getElementById('newPwInput').value='';
-  msg('pwChangeMsg','✓ Password updated! Log in again with your new password.',true);
+  msg('pwChangeMsg','✓ Password updated in cloud!',true);
   showToast('Password changed ✓');
+  // Force re-login with new password
   setTimeout(()=>{
     adminLoggedIn=false;
     document.getElementById('adminPanel').classList.remove('visible');
@@ -468,96 +626,91 @@ function changePassword(){
     document.getElementById('pwInput').value='';
     document.getElementById('pwError').textContent='';
   },1800);
-}
+};
 
-// CSV
-let parsedRows=[];
-function downloadTemplate(){
-  const csv=`title,date,time,location,description\nSunday Service,2026-03-01,09:00,Main Sanctuary,Weekly Sunday worship service\nYouth Fellowship,2026-03-14,19:00,Youth Hall Level 2,Monthly gathering for youth\nCommunity Outreach,2026-03-22,08:30,Void Deck Block 5,Distributing care packs to elderly residents\nPrayer Meeting,2026-04-06,06:30,Prayer Room,Monthly corporate prayer\nAnnual Dinner,2026-05-20,18:30,Grand Ballroom,Annual fundraising dinner`;
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='events_template.csv'; a.click(); showToast('Template downloaded ✓');
-}
-function handleCSV(input){
-  const file=input.files[0]; if(!file)return;
+// ── CSV ────────────────────────────────────────────────
+window.downloadTemplate = function(){
+  const csv=`title,date,time,location,description\nSunday Service,2026-03-01,09:00,Main Sanctuary,Weekly Sunday worship service\nYouth Fellowship,2026-03-14,19:00,Youth Hall Level 2,Monthly gathering for youth\nCommunity Outreach,2026-03-22,08:30,Void Deck Block 5,Distributing care packs to elderly\nPrayer Meeting,2026-04-06,06:30,Prayer Room,Monthly corporate prayer\nAnnual Dinner,2026-05-20,18:30,Grand Ballroom,Annual fundraising dinner`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='events_template.csv'; a.click();
+  showToast('Template downloaded ✓');
+};
+window.handleCSV = function(input){
+  const file=input.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=e=>{
     const lines=e.target.result.trim().split('\n');
     const hdr=lines[0].toLowerCase().replace(/\r/g,'').split(',').map(h=>h.trim());
     const ci={title:hdr.indexOf('title'),date:hdr.indexOf('date'),time:hdr.indexOf('time'),location:hdr.indexOf('location'),description:hdr.indexOf('description')};
-    if(ci.title<0||ci.date<0){msg('csvMsg','✗ CSV must have "title" and "date" columns',false);document.getElementById('csvPreview').style.display='none';document.getElementById('btnImport').style.display='none';return;}
+    if(ci.title<0||ci.date<0){msg('csvMsg','✗ CSV must have "title" and "date" columns',false);return;}
     parsedRows=[]; const errs=[];
     lines.slice(1).forEach((line,i)=>{
-      const raw=line.replace(/\r/g,''); if(!raw.trim())return;
+      const raw=line.replace(/\r/g,''); if(!raw.trim()) return;
       const cols=parseCSVLine(raw);
       const title=(cols[ci.title]||'').trim(), dateRaw=(cols[ci.date]||'').trim();
-      const date = normaliseDate(dateRaw);
-      if(!title||!dateRaw){errs.push(`Row ${i+2}`);return;}
-      // Validate that date parsed to something sensible
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){errs.push(`Row ${i+2} (bad date: "${dateRaw}")`);return;}
-      parsedRows.push({id:Date.now()+i,title,date,time:ci.time>=0?(cols[ci.time]||'').trim():'',location:ci.location>=0?(cols[ci.location]||'').trim():'',desc:ci.description>=0?(cols[ci.description]||'').trim():''});
+      const date=normaliseDate(dateRaw);
+      if(!title||!dateRaw){errs.push(`Row ${i+2}: missing title/date`);return;}
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){errs.push(`Row ${i+2}: bad date "${dateRaw}"`);return;}
+      parsedRows.push({id:'ev'+Date.now()+i,title,date,time:ci.time>=0?(cols[ci.time]||'').trim():'',location:ci.location>=0?(cols[ci.location]||'').trim():'',desc:ci.description>=0?(cols[ci.description]||'').trim():''});
     });
     const prev=document.getElementById('csvPreview');
     let txt=`✓ Found ${parsedRows.length} event(s)\n`;
     parsedRows.slice(0,3).forEach(ev=>txt+=`• ${ev.title} (${ev.date})\n`);
     if(parsedRows.length>3) txt+=`  ...and ${parsedRows.length-3} more`;
-    if(errs.length) txt+=`\n⚠️ Skipped ${errs.length} row(s)`;
+    if(errs.length) txt+=`\n⚠️ Skipped: ${errs.join(', ')}`;
     prev.textContent=txt; prev.style.display='block';
-    if(parsedRows.length){msg('csvMsg',`✓ ${parsedRows.length} events ready to import`,true);document.getElementById('btnImport').style.display='block';}
+    if(parsedRows.length){msg('csvMsg',`✓ ${parsedRows.length} events ready`,true);document.getElementById('btnImport').style.display='block';}
     else{msg('csvMsg','✗ No valid events found',false);document.getElementById('btnImport').style.display='none';}
   };
   reader.readAsText(file);
-}
+};
+window.importCSV = async function(){
+  if(!parsedRows.length) return;
+  const evObj={};
+  parsedRows.forEach(e=>evObj[e.id]=e);
+  await dbSet('app/events', evObj);
+  const n=parsedRows.length; parsedRows=[];
+  document.getElementById('csvPreview').style.display='none';
+  document.getElementById('btnImport').style.display='none';
+  document.getElementById('csvFile').value='';
+  msg('csvMsg','✓ Import complete!',true);
+  showToast(`✓ ${n} events imported to cloud!`);
+};
+
 function normaliseDate(raw){
-  const s = raw.trim();
-  // Already YYYY-MM-DD
+  const s=raw.trim();
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // DD/MM/YYYY or MM/DD/YYYY — assume DD/MM/YYYY (common in SG)
-  const slashMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if(slashMatch){
-    const [,d,m,y] = slashMatch;
-    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-  // DD-MM-YYYY
-  const dashMatch = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if(dashMatch){
-    const [,d,m,y] = dashMatch;
-    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-  // DD MMM YYYY e.g. "1 Mar 2026"
-  const months3 = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-  const textMatch = s.match(/^(\d{1,2})\s+([a-zA-Z]{3,})\s+(\d{4})$/);
-  if(textMatch){
-    const [,d,mon,y] = textMatch;
-    const mi = months3.indexOf(mon.toLowerCase().slice(0,3));
-    if(mi>=0) return `${y}-${String(mi+1).padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-  // Let JS try to parse it as fallback
-  const parsed = new Date(s);
-  if(!isNaN(parsed)) return parsed.toISOString().split('T')[0];
-  return s; // return as-is if nothing works
+  const slashMatch=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(slashMatch){const[,d,m,y]=slashMatch;return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  const dashMatch=s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if(dashMatch){const[,d,m,y]=dashMatch;return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  const months3=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const textMatch=s.match(/^(\d{1,2})\s+([a-zA-Z]{3,})\s+(\d{4})$/);
+  if(textMatch){const[,d,mon,y]=textMatch;const mi=months3.indexOf(mon.toLowerCase().slice(0,3));if(mi>=0)return `${y}-${String(mi+1).padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  const parsed=new Date(s); if(!isNaN(parsed)) return parsed.toISOString().split('T')[0];
+  return s;
 }
+function parseCSVLine(line){const r=[];let c='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}r.push(c);return r;}
 
-function parseCSVLine(line){ const r=[]; let c='',q=false; for(let i=0;i<line.length;i++){const ch=line[i]; if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}} r.push(c); return r; }
-function importCSV(){ if(!parsedRows.length)return; saveEvents(parsedRows); const n=parsedRows.length; parsedRows=[]; document.getElementById('csvPreview').style.display='none'; document.getElementById('btnImport').style.display='none'; document.getElementById('csvFile').value=''; renderAdminList(); init(); showToast(`✓ ${n} events imported!`); msg('csvMsg','✓ Import complete!',true); }
-
-// Close app
-function openCloseConfirm(){ document.getElementById('closeOverlay').classList.add('open'); }
-function cancelClose(){ document.getElementById('closeOverlay').classList.remove('open'); }
-function doClose(){
+// ── CLOSE APP ──────────────────────────────────────────
+window.openCloseConfirm = ()=>document.getElementById('closeOverlay').classList.add('open');
+window.cancelClose      = ()=>document.getElementById('closeOverlay').classList.remove('open');
+window.doClose = function(){
   window.close();
   setTimeout(()=>{
     document.body.innerHTML=`<div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a0a2e;color:#d4a843;font-family:'DM Sans',sans-serif;gap:12px;text-align:center;padding:24px">
-      <div style="font-size:48px">✓</div>
-      <div style="font-size:20px;font-weight:700;color:#fff">App Closed</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.4);max-width:260px;line-height:1.6">Press your phone's home button or reopen the app from your home screen.</div>
+      <div style="font-size:48px">✓</div><div style="font-size:20px;font-weight:700;color:#fff">App Closed</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4);max-width:260px;line-height:1.6">Press your phone's home button or reopen from your home screen.</div>
     </div>`;
   },200);
-}
+};
 
-// Helpers
-function msg(id,text,ok){ const el=document.getElementById(id); el.textContent=text; el.className='save-msg '+(ok?'ok':'err'); if(text)setTimeout(()=>{if(el.textContent===text)el.textContent='';},3000); }
-function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+// ── HELPERS ────────────────────────────────────────────
+function msg(id,text,ok){const el=document.getElementById(id);if(!el)return;el.textContent=text;el.className='save-msg '+(ok?'ok':'err');if(text)setTimeout(()=>{if(el.textContent===text)el.textContent='';},3000);}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-init();
+// ── START ──────────────────────────────────────────────
+initFirebase();
+
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
