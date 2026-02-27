@@ -408,25 +408,19 @@ let activeMonth   = new Date().getMonth();
 let parsedRows    = [];
 
 // ── FIREBASE INIT ──────────────────────────────────────
-function isConfigured() {
-  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR');
-}
-
 async function initFirebase() {
-  if (!isConfigured()) {
-    setLoading('Firebase not configured — using local mode', false);
-    document.getElementById('configBanner').style.display = 'block';
-    // Fall back to localStorage
-    allEvents = JSON.parse(localStorage.getItem('orgapp_events') || 'null') || SAMPLE_EVENTS;
-    appName   = localStorage.getItem('orgapp_name') || 'Our Events';
-    adminPw   = localStorage.getItem('orgapp_pw')   || DEFAULT_PW;
-    hideLoading(); renderApp();
-    return;
-  }
+  // Timeout: if no response in 10s, load sample data
+  const timeoutId = setTimeout(() => {
+    if (allEvents.length === 0) {
+      allEvents = SAMPLE_EVENTS; allVenues = [];
+      hideLoading(); renderApp();
+      syncBadge('error', '⚠️ Could not connect');
+    }
+  }, 10000);
 
   try {
     setLoading('Loading events...', true);
-    const dbURL = FIREBASE_CONFIG.databaseURL;
+    const dbURL = "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app"; // hardcoded for reliability
 
     const res = await fetch(dbURL + '/app.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
