@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Firebase Test</title></head>
-<body style="font-family:monospace;padding:24px;background:#1a0a2e;color:#fff;font-size:14px;line-height:2">
-<h2 style="color:#d4a843">Firebase Connection Test</h2>
+<head><meta charset="UTF-8"><title>Debug Test</title></head>
+<body style="font-family:monospace;padding:24px;background:#1a0a2e;color:#fff;font-size:13px;line-height:1.9">
+<h2 style="color:#d4a843">Step-by-Step Debug</h2>
 <div id="log"></div>
 <script>
 const DB_URL = "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -10,47 +10,41 @@ const DB_URL = "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedata
 function log(msg, color) {
   const d = document.createElement('div');
   d.style.color = color || '#fff';
-  d.textContent = new Date().toISOString().substr(11,8) + ' — ' + msg;
+  d.textContent = '[' + new Date().toISOString().substr(11,8) + '] ' + msg;
   document.getElementById('log').appendChild(d);
-  console.log(msg);
 }
 
-async function test() {
-  log('Starting test...', '#d4a843');
-
-  // Test 1: Basic fetch
+async function run() {
+  log('Step 1: fetch /app.json ...', '#fbbf24');
   try {
-    log('Test 1: Fetching /app.json from Firebase...');
     const res = await fetch(DB_URL + '/app.json');
-    log('Response status: ' + res.status + ' ' + res.statusText, res.ok ? '#4ade80' : '#f87171');
-    const text = await res.text();
-    log('Response body (first 200 chars): ' + text.substring(0, 200), '#a78bfa');
-    if (res.ok) log('✅ Firebase REST API is reachable!', '#4ade80');
-    else log('❌ Firebase returned error: ' + res.status, '#f87171');
-  } catch(e) {
-    log('❌ Fetch FAILED: ' + e.message, '#f87171');
-    log('This means network/CORS is blocking the request', '#fbbf24');
-  }
+    log('Step 1 OK — status: ' + res.status, '#4ade80');
 
-  // Test 2: Write test
-  try {
-    log('Test 2: Writing test value...');
-    const res2 = await fetch(DB_URL + '/connectiontest.json', {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({tested: true, time: Date.now()})
-    });
-    log('Write status: ' + res2.status, res2.ok ? '#4ade80' : '#f87171');
-    if (res2.ok) log('✅ Write works!', '#4ade80');
-    else log('❌ Write failed - check Firebase rules', '#f87171');
-  } catch(e) {
-    log('❌ Write FAILED: ' + e.message, '#f87171');
-  }
+    log('Step 2: parsing JSON ...', '#fbbf24');
+    const data = await res.json();
+    log('Step 2 OK — data is: ' + (data === null ? 'NULL' : typeof data), '#4ade80');
 
-  log('Test complete.', '#d4a843');
+    if (data) {
+      log('Step 3: data.events type = ' + typeof data.events, '#fbbf24');
+      log('Step 3: data.settings type = ' + typeof data.settings, '#fbbf24');
+
+      log('Step 4: Object.values(data.events) ...', '#fbbf24');
+      const events = Object.values(data.events || {});
+      log('Step 4 OK — ' + events.length + ' events', '#4ade80');
+
+      log('Step 5: appName = ' + (data.settings?.name || 'Our Events'), '#4ade80');
+      log('Step 5: adminPw exists = ' + !!(data.settings?.password), '#4ade80');
+    } else {
+      log('Data is null — will seed on first run', '#fbbf24');
+    }
+
+    log('✅ All steps passed — hideLoading() should work', '#4ade80');
+  } catch(e) {
+    log('❌ ERROR at: ' + e.message, '#f87171');
+    log('Stack: ' + e.stack, '#f87171');
+  }
 }
-
-test();
+run();
 </script>
 </body>
 </html>
