@@ -1,49 +1,88 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Debug Test</title></head>
-<body style="font-family:monospace;padding:24px;background:#1a0a2e;color:#fff;font-size:13px;line-height:1.9">
-<h2 style="color:#d4a843">Step-by-Step Debug</h2>
+<head><meta charset="UTF-8"><title>Debug Test 3</title>
+<style>
+  #loadingScreen{position:fixed;inset:0;background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s}
+  #loadingScreen.hidden{opacity:0;pointer-events:none}
+</style>
+</head>
+<body style="font-family:monospace;padding:24px;background:#f7f3ee;color:#1a0a2e;font-size:13px;line-height:1.9">
+
+<div id="loadingScreen"><div style="color:#d4a843;font-size:24px">Loading...</div></div>
+
+<h2>App Simulation Test</h2>
 <div id="log"></div>
+
 <script>
 const DB_URL = "https://soka-d2-events-default-rtdb.asia-southeast1.firebasedatabase.app";
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 function log(msg, color) {
   const d = document.createElement('div');
-  d.style.color = color || '#fff';
+  d.style.color = color || '#333';
   d.textContent = '[' + new Date().toISOString().substr(11,8) + '] ' + msg;
   document.getElementById('log').appendChild(d);
 }
 
+function hideLoading() {
+  log('hideLoading() called', '#16a34a');
+  const el = document.getElementById('loadingScreen');
+  el.classList.add('hidden');
+  setTimeout(() => { el.style.display = 'none'; log('loadingScreen hidden ✅', '#16a34a'); }, 500);
+}
+
+function renderApp(allEvents, appName) {
+  log('renderApp() called with ' + allEvents.length + ' events', '#6b3fa0');
+  document.getElementById('orgLabel') && (document.getElementById('orgLabel').textContent = appName);
+  const months = [...new Set(allEvents.map(e => new Date(e.date+'T00:00:00').getMonth()))].sort((a,b)=>a-b);
+  log('Months found: ' + months.map(m => SHORT_MONTHS[m]).join(', '), '#6b3fa0');
+  log('renderApp() completed ✅', '#16a34a');
+}
+
 async function run() {
-  log('Step 1: fetch /app.json ...', '#fbbf24');
+  log('--- Starting simulation ---', '#b8860b');
+
   try {
+    log('Fetching data...');
     const res = await fetch(DB_URL + '/app.json');
-    log('Step 1 OK — status: ' + res.status, '#4ade80');
-
-    log('Step 2: parsing JSON ...', '#fbbf24');
     const data = await res.json();
-    log('Step 2 OK — data is: ' + (data === null ? 'NULL' : typeof data), '#4ade80');
+    log('Data fetched ✅', '#16a34a');
 
-    if (data) {
-      log('Step 3: data.events type = ' + typeof data.events, '#fbbf24');
-      log('Step 3: data.settings type = ' + typeof data.settings, '#fbbf24');
+    const allEvents = data.events ? Object.values(data.events) : [];
+    const allVenues = data.venues ? Object.values(data.venues) : [];
+    const appName   = data.settings?.name || 'Our Events';
+    const adminPw   = data.settings?.password || 'admin123';
+    
+    log('Events: ' + allEvents.length, '#16a34a');
+    log('Venues: ' + allVenues.length, '#16a34a');
+    log('App name: ' + appName, '#16a34a');
 
-      log('Step 4: Object.values(data.events) ...', '#fbbf24');
-      const events = Object.values(data.events || {});
-      log('Step 4 OK — ' + events.length + ' events', '#4ade80');
+    log('Calling hideLoading()...');
+    hideLoading();
 
-      log('Step 5: appName = ' + (data.settings?.name || 'Our Events'), '#4ade80');
-      log('Step 5: adminPw exists = ' + !!(data.settings?.password), '#4ade80');
-    } else {
-      log('Data is null — will seed on first run', '#fbbf24');
-    }
+    log('Calling renderApp()...');
+    renderApp(allEvents, appName);
 
-    log('✅ All steps passed — hideLoading() should work', '#4ade80');
+    log('Calling populateLocationDropdown()...');
+    // simulate it
+    const sel = document.createElement('select');
+    allVenues.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.id; o.textContent = v.name;
+      sel.appendChild(o);
+    });
+    log('populateLocationDropdown() ✅', '#16a34a');
+
+    log('--- ALL DONE — app should be visible ✅ ---', '#b8860b');
+
   } catch(e) {
-    log('❌ ERROR at: ' + e.message, '#f87171');
-    log('Stack: ' + e.stack, '#f87171');
+    log('❌ CRASH: ' + e.message, '#c0392b');
+    log('Stack: ' + (e.stack||'').split('\n')[1], '#c0392b');
   }
 }
+
 run();
 </script>
 </body>
