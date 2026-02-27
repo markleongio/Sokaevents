@@ -202,30 +202,10 @@ const FIREBASE_CONFIG = {
 <body>
 
 <!-- LOADING SCREEN -->
-<div id="errorDisplay" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#c0392b;color:#fff;font-size:11px;font-family:monospace;padding:10px;z-index:9999;max-height:40vh;overflow-y:auto"></div>
-
-<script>
-window.onerror = function(msg, src, line, col, err) {
-  const el = document.getElementById('errorDisplay');
-  if (el) {
-    el.style.display = 'block';
-    el.innerHTML += '<div><b>ERROR line ' + line + ':</b> ' + msg + '</div>';
-  }
-  return false;
-};
-window.onunhandledrejection = function(e) {
-  const el = document.getElementById('errorDisplay');
-  if (el) {
-    el.style.display = 'block';
-    el.innerHTML += '<div><b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason) + '</div>';
-  }
-};
-</script>
-
 <div id="loadingScreen">
   <div class="loading-logo">Our <em>Events</em></div>
   <div class="loading-spinner"></div>
-  <div class="loading-status" id="loadingStatus">Connecting to cloud...</div>
+  <div class="loading-status" id="loadingStatus">Connecting... v5</div>
 </div>
 
 <!-- CONFIG WARNING (shown if Firebase not configured) -->
@@ -819,11 +799,13 @@ window.deleteVenue = function(id) {
   const row = document.createElement('div');
   row.id = 'vdel-' + id;
   row.style.cssText = 'margin-top:8px;background:#fdecea;border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px';
-  row.innerHTML = '<span style="font-size:12px;color:var(--red);font-weight:500">Delete this venue?</span>' +
-    '<div style="display:flex;gap:6px">' +
-    '<button onclick="confirmDeleteVenue('' + id + '')" style="padding:5px 12px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Yes</button>' +
-    '<button onclick="document.getElementById('vdel-' + id + '').remove()" style="padding:5px 12px;background:#ddd;color:#555;border:none;border-radius:6px;font-size:12px;cursor:pointer">No</button>' +
-    '</div>';
+  row.innerHTML = [
+    '<span style="font-size:12px;color:var(--red);font-weight:500">Delete this venue?</span>',
+    '<div style="display:flex;gap:6px">',
+    '<button onclick="confirmDeleteVenue(\'' + id + '\')" style="padding:5px 12px;background:#c0392b;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Yes</button>',
+    '<button onclick="document.getElementById(\'vdel-' + id + '\').remove()" style="padding:5px 12px;background:#ddd;color:#555;border:none;border-radius:6px;font-size:12px;cursor:pointer">No</button>',
+    '</div>'
+  ].join('');
   item.appendChild(row);
 };
 
