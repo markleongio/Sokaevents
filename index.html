@@ -454,7 +454,21 @@ function renderAdminList(){
 }
 
 // Password
-function changePassword(){ const p=document.getElementById('newPwInput').value.trim(); if(!p||p.length<4){msg('pwChangeMsg','✗ Min 4 characters',false);return;} localStorage.setItem(PW_KEY,p); document.getElementById('newPwInput').value=''; msg('pwChangeMsg','✓ Password updated!',true); }
+function changePassword(){
+  const p=document.getElementById('newPwInput').value.trim();
+  if(!p||p.length<4){msg('pwChangeMsg','✗ Min 4 characters',false);return;}
+  localStorage.setItem(PW_KEY, p);
+  document.getElementById('newPwInput').value='';
+  msg('pwChangeMsg','✓ Password updated! Log in again with your new password.',true);
+  showToast('Password changed ✓');
+  setTimeout(()=>{
+    adminLoggedIn=false;
+    document.getElementById('adminPanel').classList.remove('visible');
+    document.getElementById('pwScreen').style.display='block';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwError').textContent='';
+  },1800);
+}
 
 // CSV
 let parsedRows=[];
