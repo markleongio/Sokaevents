@@ -338,7 +338,7 @@ const FIREBASE_CONFIG = {
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, get, onValue }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, set, get, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 // ── CONSTANTS ──────────────────────────────────────────
 const DEFAULT_PW = 'admin123';
@@ -586,9 +586,23 @@ window.deleteEvent = function(id) {
   item.appendChild(row);
 };
 window.confirmDelete = async function(id) {
-  // Set to null deletes in Firebase Realtime Database
-  await dbSet('app/events/'+id, null);
-  showToast('Event deleted');
+  try {
+    if (db) {
+      // Use Firebase remove() — the correct way to delete a node
+      await remove(ref(db, 'app/events/' + id));
+    } else {
+      // localStorage fallback
+      const events = JSON.parse(localStorage.getItem('orgapp_events') || '[]');
+      localStorage.setItem('orgapp_events', JSON.stringify(events.filter(e => e.id !== id)));
+      allEvents = allEvents.filter(e => e.id !== id);
+      renderAdminList();
+      renderApp();
+    }
+    showToast('Event deleted ✓');
+  } catch(e) {
+    console.error('Delete error:', e);
+    showToast('⚠️ Delete failed — try again');
+  }
 };
 
 function renderAdminList() {
